@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import { 
   Github, 
@@ -19,7 +19,7 @@ import {
 
 const COLORS = {
   bg: '#FFF1F2',
-  text: '#000000',
+  text: '#1F2937', // Dark grey/black for better readability
   primary: '#FF5252', // Red
   secondary: '#00E5FF', // Cyan
   accent: '#FFF500', // Yellow
@@ -85,14 +85,14 @@ const STYLES = {
     gap: '10px',
     padding: '16px 32px',
     border: `4px solid ${COLORS.border}`,
-    boxShadow: `6px 6px 0px ${COLORS.border}`,
     fontWeight: 'bold',
     fontSize: '1.1rem',
     cursor: 'pointer' as const,
     fontFamily: '"Space Mono", monospace',
     textTransform: 'uppercase' as const,
-    transition: 'transform 0.1s ease',
+    transition: 'all 0.1s ease',
     textDecoration: 'none',
+    outline: 'none',
   },
   card: {
     backgroundColor: COLORS.cardBg,
@@ -113,6 +113,36 @@ const STYLES = {
     fontSize: '0.9rem',
     boxShadow: `4px 4px 0px ${COLORS.border}`,
   }
+};
+
+// Component for interactive buttons with press effect
+const InteractiveButton = ({ children, style, ...props }) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const [isActive, setIsActive] = useState(false);
+
+  const dynamicStyle = {
+    ...STYLES.button,
+    ...style,
+    transform: isActive 
+      ? 'translate(6px, 6px)' 
+      : (isHovered ? 'translate(2px, 2px)' : 'translate(0, 0)'),
+    boxShadow: isActive 
+      ? '0px 0px 0px black' 
+      : (isHovered ? '4px 4px 0px black' : '6px 6px 0px black'),
+  };
+
+  return (
+    <button
+      style={dynamicStyle}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onMouseDown={() => setIsActive(true)}
+      onMouseUp={() => setIsActive(false)}
+      {...props}
+    >
+      {children}
+    </button>
+  );
 };
 
 const Ticker = ({ text, color }) => (
@@ -215,14 +245,14 @@ const Hero = () => {
 
             <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
               <a href="https://www.linkedin.com/in/pavan90/" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-                <button style={{ ...STYLES.button, backgroundColor: '#0077B5', color: COLORS.white }}>
+                <InteractiveButton style={{ backgroundColor: '#0077B5', color: COLORS.white }}>
                   <Linkedin size={24} /> LINKEDIN
-                </button>
+                </InteractiveButton>
               </a>
               <a href="https://github.com/PavanAnganna90" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-                <button style={{ ...STYLES.button, backgroundColor: COLORS.black, color: COLORS.white }}>
+                <InteractiveButton style={{ backgroundColor: COLORS.black, color: COLORS.white }}>
                   <Github size={24} /> GITHUB
-                </button>
+                </InteractiveButton>
               </a>
             </div>
           </div>
@@ -283,63 +313,74 @@ const Hero = () => {
   );
 };
 
-const ExperienceCard = ({ role, company, duration, location, details, color }) => (
-  <div style={{ 
-    ...STYLES.card, 
-    marginBottom: '40px',
-    backgroundColor: COLORS.white 
-  }}>
-    <div style={{ 
-      position: 'absolute', 
-      top: '-20px', 
-      left: '-10px', 
-      backgroundColor: color, 
-      border: STYLES.border, 
-      padding: '10px',
-      boxShadow: '4px 4px 0px #000'
-    }}>
-      <Briefcase size={24} color="black" />
-    </div>
+const ExperienceCard = ({ role, company, duration, location, details, color }) => {
+  const [isHovered, setIsHovered] = useState(false);
 
-    <div style={{ 
-      position: 'absolute', 
-      top: '-20px', 
-      right: '20px', 
-      backgroundColor: COLORS.black, 
-      color: COLORS.white, 
-      padding: '5px 15px', 
-      fontFamily: '"Space Mono", monospace',
-      fontWeight: 'bold',
-      boxShadow: '4px 4px 0px #888'
-    }}>
-      {duration}
-    </div>
+  return (
+    <div 
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{ 
+        ...STYLES.card, 
+        marginBottom: '40px',
+        backgroundColor: COLORS.white,
+        transform: isHovered ? 'translate(-6px, -6px)' : 'none',
+        boxShadow: isHovered ? `16px 16px 0px ${COLORS.border}` : `12px 12px 0px ${COLORS.border}`,
+        transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+      }}
+    >
+      <div style={{ 
+        position: 'absolute', 
+        top: '-20px', 
+        left: '-10px', 
+        backgroundColor: color, 
+        border: STYLES.border, 
+        padding: '10px',
+        boxShadow: '4px 4px 0px #000'
+      }}>
+        <Briefcase size={24} color="black" />
+      </div>
 
-    <div style={{ marginTop: '20px', marginBottom: '20px', borderBottom: `2px solid ${COLORS.border}`, paddingBottom: '20px' }}>
-      <h3 style={{ ...STYLES.h3, fontSize: '1.8rem' }}>{company}</h3>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
-        <span style={{ fontFamily: '"Space Mono", monospace', color: COLORS.purple, fontWeight: 'bold', fontSize: '1.2rem' }}>
-          {role}
-        </span>
-        <span style={{ fontFamily: '"Space Mono", monospace', opacity: 0.7 }}>
-          {location}
-        </span>
+      <div style={{ 
+        position: 'absolute', 
+        top: '-20px', 
+        right: '20px', 
+        backgroundColor: COLORS.black, 
+        color: COLORS.white, 
+        padding: '5px 15px', 
+        fontFamily: '"Space Mono", monospace',
+        fontWeight: 'bold',
+        boxShadow: '4px 4px 0px #888'
+      }}>
+        {duration}
+      </div>
+
+      <div style={{ marginTop: '20px', marginBottom: '20px', borderBottom: `2px solid ${COLORS.border}`, paddingBottom: '20px' }}>
+        <h3 style={{ ...STYLES.h3, fontSize: '1.8rem' }}>{company}</h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
+          <span style={{ fontFamily: '"Space Mono", monospace', color: COLORS.purple, fontWeight: 'bold', fontSize: '1.2rem' }}>
+            {role}
+          </span>
+          <span style={{ fontFamily: '"Space Mono", monospace', opacity: 0.7 }}>
+            {location}
+          </span>
+        </div>
+      </div>
+      
+      <div style={STYLES.text}>
+        {Array.isArray(details) ? (
+          <ul style={{ paddingLeft: '20px', margin: 0 }}>
+            {details.map((item, i) => (
+              <li key={i} style={{ marginBottom: '10px' }}>{item}</li>
+            ))}
+          </ul>
+        ) : (
+          <p>{details}</p>
+        )}
       </div>
     </div>
-    
-    <div style={STYLES.text}>
-      {Array.isArray(details) ? (
-        <ul style={{ paddingLeft: '20px', margin: 0 }}>
-          {details.map((item, i) => (
-            <li key={i} style={{ marginBottom: '10px' }}>{item}</li>
-          ))}
-        </ul>
-      ) : (
-        <p>{details}</p>
-      )}
-    </div>
-  </div>
-);
+  );
+};
 
 const ExperienceSection = () => {
   const experiences = [
@@ -711,34 +752,74 @@ const RecommendationsSection = () => (
   </div>
 );
 
-const Footer = () => (
-  <footer style={{
-    marginTop: '0px',
-    backgroundColor: COLORS.border,
-    color: COLORS.white,
-    padding: '60px 20px',
-    textAlign: 'center',
-    fontFamily: '"Space Mono", monospace',
-    borderTop: `5px solid ${COLORS.text}`
-  }}>
-    <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-      <h2 style={{ fontFamily: '"Archivo Black", sans-serif', fontSize: '3rem', marginBottom: '30px', color: COLORS.accent, textTransform: 'uppercase' }}>Let's Connect</h2>
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '30px', marginBottom: '40px', flexWrap: 'wrap' }}>
-        <a href="https://www.linkedin.com/in/pavan90/" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-           <button style={{ ...STYLES.button, backgroundColor: '#0077B5', color: COLORS.white }}>
-              <Linkedin size={24} /> LINKEDIN
-           </button>
-        </a>
-         <a href="https://github.com/PavanAnganna90" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-           <button style={{ ...STYLES.button, backgroundColor: '#d12e2e', color: COLORS.white }}>
-              <Github size={24} /> GITHUB
-           </button>
-        </a>
+const Footer = () => {
+  const [isVisible, setIsVisible] = useState(false);
+  const footerRef = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+    
+    if (footerRef.current) {
+      observer.observe(footerRef.current);
+    }
+
+    return () => {
+      if (footerRef.current) {
+        observer.unobserve(footerRef.current);
+      }
+    };
+  }, []);
+
+  return (
+    <footer 
+      ref={footerRef}
+      style={{
+        marginTop: '0px',
+        backgroundColor: COLORS.border,
+        color: COLORS.white,
+        padding: '60px 20px',
+        textAlign: 'center',
+        fontFamily: '"Space Mono", monospace',
+        borderTop: `5px solid ${COLORS.text}`
+      }}
+    >
+      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+        <h2 style={{ 
+          fontFamily: '"Archivo Black", sans-serif', 
+          fontSize: '3rem', 
+          marginBottom: '30px', 
+          color: COLORS.accent, 
+          textTransform: 'uppercase',
+          opacity: isVisible ? 1 : 0,
+          transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
+          transition: 'opacity 0.8s ease-out, transform 0.8s ease-out'
+        }}>
+          Let's Connect
+        </h2>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '30px', marginBottom: '40px', flexWrap: 'wrap' }}>
+          <a href="https://www.linkedin.com/in/pavan90/" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+             <InteractiveButton style={{ backgroundColor: '#0077B5', color: COLORS.white }}>
+                <Linkedin size={24} /> LINKEDIN
+             </InteractiveButton>
+          </a>
+           <a href="https://github.com/PavanAnganna90" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+             <InteractiveButton style={{ backgroundColor: '#d12e2e', color: COLORS.white }}>
+                <Github size={24} /> GITHUB
+             </InteractiveButton>
+          </a>
+        </div>
+        <p style={{ opacity: 0.6 }}>© {new Date().getFullYear()} Pavan Anganna. Built with React & Neo-Brutalism.</p>
       </div>
-      <p style={{ opacity: 0.6 }}>© {new Date().getFullYear()} Pavan Anganna. Built with React & Neo-Brutalism.</p>
-    </div>
-  </footer>
-);
+    </footer>
+  );
+};
 
 const App = () => {
   return (
@@ -752,7 +833,7 @@ const App = () => {
       <nav style={{ 
         padding: '20px', 
         borderBottom: STYLES.border, 
-        backgroundColor: COLORS.white,
+        backgroundColor: COLORS.white, 
         position: 'sticky',
         top: 0,
         zIndex: 100,
