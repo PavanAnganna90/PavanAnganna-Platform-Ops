@@ -1,16 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, CSSProperties, ButtonHTMLAttributes, FC, ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { 
   Github, 
   Linkedin, 
-  Mail, 
   ExternalLink, 
-  Terminal, 
-  Cpu, 
-  Cloud, 
-  Server, 
-  Code, 
-  Database,
   Award,
   BookOpen,
   Briefcase,
@@ -115,12 +108,17 @@ const STYLES = {
   }
 };
 
+interface InteractiveButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  children: ReactNode;
+  style?: CSSProperties;
+}
+
 // Component for interactive buttons with press effect
-const InteractiveButton = ({ children, style, ...props }) => {
+const InteractiveButton: FC<InteractiveButtonProps> = ({ children, style, ...props }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isActive, setIsActive] = useState(false);
 
-  const dynamicStyle = {
+  const dynamicStyle: CSSProperties = {
     ...STYLES.button,
     ...style,
     transform: isActive 
@@ -145,7 +143,12 @@ const InteractiveButton = ({ children, style, ...props }) => {
   );
 };
 
-const Ticker = ({ text, color }) => (
+interface TickerProps {
+  text: string;
+  color: string;
+}
+
+const Ticker: FC<TickerProps> = ({ text, color }) => (
   <div style={{
     backgroundColor: color,
     borderTop: STYLES.border,
@@ -313,7 +316,16 @@ const Hero = () => {
   );
 };
 
-const ExperienceCard = ({ role, company, duration, location, details, color }) => {
+interface ExperienceCardProps {
+  role: string;
+  company: string;
+  duration: string;
+  location: string;
+  details: string | string[];
+  color: string;
+}
+
+const ExperienceCard: FC<ExperienceCardProps> = ({ role, company, duration, location, details, color }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
@@ -754,7 +766,7 @@ const RecommendationsSection = () => (
 
 const Footer = () => {
   const [isVisible, setIsVisible] = useState(false);
-  const footerRef = useRef(null);
+  const footerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -878,5 +890,8 @@ const App = () => {
   );
 };
 
-const root = createRoot(document.getElementById('root'));
-root.render(<App />);
+const rootElement = document.getElementById('root');
+if (rootElement) {
+  const root = createRoot(rootElement);
+  root.render(<App />);
+}
